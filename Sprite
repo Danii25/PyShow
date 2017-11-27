@@ -1,0 +1,111 @@
+import pygame
+
+__all__ = ('Sprite', 'SpritesGroup')
+
+class Sprite(pygame.sprite.Sprite):
+    '''
+    super class methods:
+        .add(*groups) -> adds the current sprite to
+                        groups passed
+        .remove(*groups) -> removes the current sprite
+                        to groups passed
+        .kill() -> removes the current sprite from all
+                    the groups which contain it
+        .alive() -> returns True when the current sprite
+                    belongs to at least one group
+    '''
+    def __init__(self, path, center = None, update = lambda: None):
+        '''
+        path: path of the image you want to display
+        update: function called every frame
+        '''
+        super(Sprite, self).__init__()
+        self.image = pygame.image.load(path)
+        if center is not None:
+            self.rect = self.image.get_rect(center = center)
+        else:
+            self.rect = self.image.get_rect()
+        self.update = update if callable(update) else lambda: None
+
+    def updatePosition(self, position):
+        '''
+        position: tuple containing 2 values: (x, y)
+        this function allows you to update frame by frame
+        the position of the sprite
+        '''
+        self.rect.x += position[0]
+        self.rect.y += position[1]
+
+    def setPosition(self, position):
+        '''
+        position: tuple containing 2 values: (x, y)
+        this function allows you to reset the position of
+        the sprite
+        '''
+        self.rect.x += position[0]
+        self.rect.y += position[1]
+
+    @property
+    def x(self):
+        return self.rect.x
+
+    @x.setter
+    def x(self, value):
+        self.rect.x = value
+
+    @property
+    def y(self):
+        return self.rect.y
+
+    @y.setter
+    def y(self, value):
+        self.rect.y = value
+
+class SpritesGroup(pygame.sprite.Group):
+    '''
+    this class allows you to fit all the sprites
+    you have in a group
+    methods:
+        .add(sprite) -> adds a sprite to the current
+                        group
+        .update(*args) -> calls the update funcs
+                        for each sprite
+        .draw() -> draws each sprite on the screen
+        .empty() -> removes all sprites from the group
+    '''
+    def __init__(self, context, sprites = []):
+        '''
+        context: reference to the screen on which draw
+            sprites
+        sprites = list containing sprites (optional)
+        '''
+        self.context = context
+        super(SpritesGroup, self).__init__()
+        for sprite in sprites:
+            self.add(sprite)
+
+    def draw(self):
+        super(SpritesGroup, self).draw(self.context)
+
+
+
+if __name__ == '__main__':
+
+    pygame.init()
+    screen = pygame.display.set_mode((700, 500))
+    done = False
+    
+    image = Sprite('../img2.gif')
+    group = SpritesGroup(context = screen,
+                  sprites = [image])
+    #image.add(group) -> equal to sprites = (image, )
+    
+    while not done:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+        
+        screen.fill((40, 40, 40))
+        group.draw()
+        pygame.display.flip()
+    pygame.quit()
